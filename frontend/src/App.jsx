@@ -89,7 +89,7 @@ function App() {
   const onUpdateText = async (id, next) => {
     const value = next?.trim()
 
-    if(!value) return
+    if (!value) return
 
     try {
       const { data } = await axios.patch(`${API}/${id}/text`,
@@ -112,6 +112,33 @@ function App() {
     }
   }
 
+  const onUpdate = async (id, next) => {
+    try {
+      const current = Array.isArray(todos) ? todos.find(t => t._id == id) : null
+
+      if (!current) throw new Error("해당 아이디의 todo 없음")
+
+      const { data } = await axios.put(`${API}/${id}`, next)
+
+      const updated = data?.updated ?? data?.todo ?? data;
+      setTodos(
+        prev => prev.map(t => (t._id === updated._id ? updated : t))
+      )
+
+    } catch (error) {
+      console.error("업데이트 실패", error)
+    }
+  }
+
+  const onupdateTodo = async (id, next) => {
+    try {
+      await onUpdate(id, next)
+
+    } catch (error) {
+      console.error("업데이트 실패", error)
+    }
+  }
+
   return (
     <div className='App'>
       <Header />
@@ -120,7 +147,7 @@ function App() {
       <TodoList
         todos={Array.isArray(todos) ? todos : []}
         onUpdateChecked={onUpdateChecked}
-        onUpdateText={onUpdateText}
+        onupdateTodo={onupdateTodo}
         onDelete={onDelete} />
     </div>
   )
