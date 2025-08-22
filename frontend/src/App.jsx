@@ -4,17 +4,20 @@ import './App.css'
 import Header from './components/Header'
 import TodoEditor from './components/TodoEditor'
 import TodoList from './components/TodoList'
-
+import { api, ensureGuestAuth } from './lib/api'
 
 function App() {
 
   const [todos, setTodos] = useState([])
-  const API = `${import.meta.env.VITE_API_URL}/api/todos`
+  const API = 'api/todos'
 
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const res = await axios.get(API)
+
+        await ensureGuestAuth()
+
+        const res = await api.get(API)
         const data = Array.isArray(res.data) ?
           res.data : res.data.todos ?? []
 
@@ -30,7 +33,7 @@ function App() {
   const onCreate = async (todoText) => {
     if (!todoText.trim()) return
     try {
-      const res = await axios.post(API, { text: todoText.trim() })
+      const res = await api.post(API, { text: todoText.trim() })
 
       const created = res.data?.todo ?? res.data
 
@@ -48,7 +51,7 @@ function App() {
     try {
       if (!confirm("정말 삭제할까요?")) return
 
-      const { data } = await axios.delete(`${API}/${id}`)
+      const { data } = await api.delete(`${API}/${id}`)
 
       console.log(data)
       if (Array.isArray(data?.todos)) {
@@ -66,7 +69,7 @@ function App() {
 
   const onUpdateChecked = async (id, next) => {
     try {
-      const { data } = await axios.patch(`${API}/${id}/check`,
+      const { data } = await api.patch(`${API}/${id}/check`,
         {
           isCompleted: next
         }
@@ -118,7 +121,7 @@ function App() {
 
       if (!current) throw new Error("해당 아이디의 todo 없음")
 
-      const { data } = await axios.put(`${API}/${id}`, next)
+      const { data } = await api.put(`${API}/${id}`, next)
 
       const updated = data?.updated ?? data?.todo ?? data;
       setTodos(
