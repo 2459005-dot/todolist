@@ -18,7 +18,7 @@ router.post('/guest', (req, res) => {
 
         res.cookie('auth', token, {
             httpOnly: true,
-            sameSite: "lax",
+            sameSite: "none",
             secure: false,
             maxAge: 7 * 24 * 60 * 60 * 1000,
             path: '/'
